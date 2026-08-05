@@ -83,11 +83,20 @@ const {
     </footer>
 
     <script is:inline>
-      document.querySelectorAll('.twitter-timeline').forEach(function (a) {
-        a.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') || 'dark');
-      });
+      // widgets.js for X is loaded dynamically by TwitterFeed.astro per panel.
+      // This global function is just a helper for the theme toggle.
+      window.__loadTwttr = function () {
+        if (window.twttr) return Promise.resolve(window.twttr);
+        return new Promise(function (resolve) {
+          var s = document.createElement('script');
+          s.src = 'https://platform.x.com/widgets.js';
+          s.async = true;
+          s.charset = 'utf-8';
+          s.onload = function () { resolve(window.twttr); };
+          document.head.appendChild(s);
+        });
+      };
     </script>
-    <script is:inline async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
     <script>
       // Theme toggle
@@ -102,8 +111,9 @@ const {
         document
           .querySelectorAll('.twitter-timeline')
           .forEach((a) => a.setAttribute('data-theme', next));
-        const twttr = (window as any).twttr;
-        if (twttr?.widgets?.load) twttr.widgets.load();
+        (window as any).__loadTwttr?.().then(function (twttr: any) {
+          if (twttr?.widgets?.load) twttr.widgets.load();
+        });
       });
 
       // Hover-glow pointer tracking for action buttons

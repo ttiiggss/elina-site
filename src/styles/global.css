@@ -834,6 +834,15 @@ h1, h2, h3, h4 {
   text-align: center;
 }
 
+/* ---------- Third-party widget embed ---------- */
+.widget-embed {
+  width: 100%;
+  min-height: 220px;
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+.widget-embed :global(iframe) { width: 100% !important; }
+
 /* ---------- Generic embed (Instagram / TikTok) ---------- */
 .embed-stack { display: flex; flex-direction: column; gap: var(--space-4); }
 .embed-item {

@@ -6,17 +6,11 @@ export interface Props {
   feed: Feed;
 }
 const { feed } = Astro.props;
+const handle = feed.handle.replace(/^@/, '');
 ---
 
-<div class="twitter-wrap" data-twitter-fallback={feed.url}>
-  <a
-    class="twitter-timeline"
-    href={feed.url}
-    data-chrome="noheader nofooter noborders transparent"
-    data-tweet-limit="3"
-    data-aria-polite="polite"
-    data-dnt="true"
-    data-width="100%">
+<div class="twitter-wrap" data-twitter-fallback={feed.url} data-handle={handle}>
+  <a class="twitter-timeline" href={feed.url}>
     Latest tweets by {feed.handle}
   </a>
 
@@ -37,17 +31,61 @@ const { feed } = Astro.props;
 
 <script is:inline>
   (function () {
-    // If X's widgets.js hasn't rendered an iframe after 5s, show a useful
-    // fallback instead of leaving a blank box (ad blockers / privacy tools
-    // frequently block platform.twitter.com).
+    function showFallback(wrap) {
+      var a = wrap.querySelector('.twitter-timeline');
+      if (a) a.style.display = 'none';
+      var fb = wrap.querySelector('.twitter-fallback');
+      if (fb) fb.style.display = '';
+    }
+
+    function loadWidgets(wrap) {
+      var twttr = window.twttr;
+      if (twttr && twttr.widgets && twttr.widgets.load) {
+        twttr.widgets.load(wrap);
+      } else {
+        var s = document.createElement('script');
+        s.src = 'https://platform.x.com/widgets.js';
+        s.async = true;
+        s.charset = 'utf-8';
+        s.onload = function () {
+          var t = window.twttr;
+          if (t && t.widgets && t.widgets.load) t.widgets.load(wrap);
+        };
+        document.head.appendChild(s);
+      }
+    }
+
+    function renderOembed(wrap) {
+      var handle = wrap.getAttribute('data-handle') || '';
+      if (!handle) {
+        showFallback(wrap);
+        return;
+      }
+      fetch('/api/twitter?handle=' + encodeURIComponent(handle) + '&theme=' + encodeURIComponent(document.documentElement.getAttribute('data-theme') || 'dark'))
+        .then(function (r) {
+          if (!r.ok) throw new Error('http ' + r.status);
+          return r.text();
+        })
+        .then(function (html) {
+          if (!html.trim()) throw new Error('empty');
+          var placeholder = wrap.querySelector('.twitter-timeline');
+          if (!placeholder) throw new Error('no placeholder');
+          placeholder.outerHTML = html;
+          loadWidgets(wrap);
+          // If no iframe appears after 6s, the widget was blocked or failed.
+          setTimeout(function () {
+            if (!wrap.querySelector('iframe')) showFallback(wrap);
+          }, 6000);
+        })
+        .catch(function () {
+          showFallback(wrap);
+        });
+    }
+
     setTimeout(function () {
-      document.querySelectorAll('[data-twitter-fallback]').forEach(function (wrap) {
-        if (wrap.querySelector('iframe')) return;
-        var a = wrap.querySelector('.twitter-timeline');
-        if (a) a.style.display = 'none';
-        var fb = wrap.querySelector('.twitter-fallback');
-        if (fb) fb.style.display = '';
+      document.querySelectorAll('[data-twitter-fallback]').forEach(function (el) {
+        renderOembed(el);
       });
-    }, 5000);
+    }, 100);
   })();
 </script>

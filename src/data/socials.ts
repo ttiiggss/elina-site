@@ -1,22 +1,22 @@
 /* =====================================================================
    Elina — socials & feed configuration
    ---------------------------------------------------------------------
-   Edit this file to keep links and embeddable posts up to date.
+   Edit this file to keep links and widgets up to date.
 
    HOW THE FEEDS WORK
    - twitch ....... official live channel player embed (always live, no key)
    - youtube ...... fetched live from YouTube's public RSS feed via
                     /api/youtube -> last 3 uploads, no API key needed
-   - twitter ...... official X timeline embed widgets (last 3 tweets, live)
-   - instagram .... official single-post embeds, driven by the `posts`
-                    array below. Instagram has NO public profile-timeline
-                    widget, so paste the URLs of your 3 latest posts.
-   - tiktok ....... official single-video embeds, driven by `posts`.
-                    TikTok has NO public profile-timeline widget, so paste
-                    the URLs of your 3 latest videos.
-
-   Until `posts` contains real URLs, a polished placeholder card is shown
-   for that account. Add a URL and the native embed renders automatically.
+   - twitter ...... /api/twitter fetches the official X oEmbed HTML,
+                    page injects the timeline anchor and loads widgets.js.
+                    Falls back to a clean "Open profile" card if X's
+                    widgets.js is blocked (ad blockers, privacy tools, etc.).
+   - instagram .... a third-party widget snippet (optional) or a profile
+                    card. Instagram has NO free public profile feed, so the
+                    only no-effort live option is a paid widget service such
+                    as Curator, Elfsight, Poper, Pane, WidgetJar, or
+                    EmbedSocial. Paste their embed snippet in `widgetSnippet`.
+   - tiktok ....... same as Instagram: paid widget snippet or profile card.
    ===================================================================== */
 
 export interface ActionLink {
@@ -35,6 +35,7 @@ export interface Feed {
   platform: string;
   /** optional sub-label, e.g. "Art" or "Cats" */
   sub?: string;
+  /** display handle, e.g. "elina" or "@YaBoiElina". For X, the @ is stripped server-side. */
   handle: string;
   url: string;
   icon: string;
@@ -42,10 +43,11 @@ export interface Feed {
   /** optional secondary brand color (e.g. TikTok's cyan + red) */
   accent2?: string;
   kind: FeedKind;
-  /** only for kind === 'embed' */
+  /** only for kind === 'embed' (Instagram / TikTok) */
   embed?: 'instagram' | 'tiktok';
-  /** only for kind === 'embed': latest post URLs (max 3 shown) */
-  posts?: string[];
+  /** optional third-party widget embed snippet. If provided, it is rendered
+      directly in the panel and the widget service loads the live feed. */
+  widgetSnippet?: string;
 }
 
 export const profile = {
@@ -128,11 +130,8 @@ export const feeds: Feed[] = [
     accent: '#d62976',
     kind: 'embed',
     embed: 'instagram',
-    posts: [
-      // 'https://www.instagram.com/p/XXXXXXXX/',
-      // 'https://www.instagram.com/p/YYYYYYYY/',
-      // 'https://www.instagram.com/p/ZZZZZZZZ/',
-    ],
+    // Example: paste a Curator / Elfsight / Poper embed snippet here.
+    // widgetSnippet: '<div class="some-widget" data-id="..."></div><script src="..."></script>',
   },
   {
     id: 'instagram-art',
@@ -144,11 +143,6 @@ export const feeds: Feed[] = [
     accent: '#b15cff',
     kind: 'embed',
     embed: 'instagram',
-    posts: [
-      // 'https://www.instagram.com/p/XXXXXXXX/',
-      // 'https://www.instagram.com/p/YYYYYYYY/',
-      // 'https://www.instagram.com/p/ZZZZZZZZ/',
-    ],
   },
   {
     id: 'tiktok-main',
@@ -160,11 +154,6 @@ export const feeds: Feed[] = [
     accent2: '#FE2C55',
     kind: 'embed',
     embed: 'tiktok',
-    posts: [
-      // 'https://www.tiktok.com/@elinatwitch/video/0000000000000000000',
-      // 'https://www.tiktok.com/@elinatwitch/video/1111111111111111111',
-      // 'https://www.tiktok.com/@elinatwitch/video/2222222222222222222',
-    ],
   },
   {
     id: 'tiktok-cats',
@@ -177,10 +166,5 @@ export const feeds: Feed[] = [
     accent2: '#FE2C55',
     kind: 'embed',
     embed: 'tiktok',
-    posts: [
-      // 'https://www.tiktok.com/@elinascats/video/0000000000000000000',
-      // 'https://www.tiktok.com/@elinascats/video/1111111111111111111',
-      // 'https://www.tiktok.com/@elinascats/video/2222222222222222222',
-    ],
   },
 ];

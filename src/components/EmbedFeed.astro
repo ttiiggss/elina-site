@@ -15,13 +15,19 @@ const cta = feed.platform === 'Instagram'
   : 'Watch the latest videos on TikTok.';
 ---
 
-<div class="fallback-card" style={`--accent:${feed.accent}`}>
-  <div class={`fb-icon ${iconClass}`} style={iconStyle}>
-    <Icon name={feed.icon} size={28} />
-  </div>
-  <div class="fb-handle">{feed.handle}</div>
-  <div class="fb-text">{cta}</div>
-  <a class="fb-btn" href={feed.url} target="_blank" rel="noopener" style={`--accent:${feed.accent}`}>
-    Open profile <Icon name="external" size={14} />
-  </a>
-</div>
+{
+  feed.widgetSnippet ? (
+    <div class="widget-embed" set:html={feed.widgetSnippet} />
+  ) : (
+    <div class="fallback-card" style={`--accent:${feed.accent}`}>
+      <div class={`fb-icon ${iconClass}`} style={iconStyle}>
+        <Icon name={feed.icon} size={28} />
+      </div>
+      <div class="fb-handle">{feed.handle}</div>
+      <div class="fb-text">{cta}</div>
+      <a class="fb-btn" href={feed.url} target="_blank" rel="noopener" style={`--accent:${feed.accent}`}>
+        Open profile <Icon name="external" size={14} />
+      </a>
+    </div>
+  )
+}

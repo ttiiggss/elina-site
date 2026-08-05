@@ -26,19 +26,20 @@ posts from each platform plus Discord / Throne / Donate links.
   (`https://www.youtube.com/feeds/videos.xml?channel_id=UCZBRLTVr1ZITpLsRGC-saGA`),
   returns the latest 3 uploads as JSON. 5-minute in-memory cache. Rendered
   client-side by `YouTubeFeed.astro`.
-- **Twitter/X (x2)** — official timeline embed widgets (`platform.twitter.com/widgets.js`,
-  `data-tweet-limit="3"`). Theme synced to the site theme in `Base.astro`.
-  X timeline embeds are unreliable and often blocked by ad blockers / privacy
-  tools, so `TwitterFeed.astro` has a 5-second timeout fallback that shows a
-  clean "Open profile" card when the embed fails.
+- **Twitter/X (x2)** — `/api/twitter` fetches the official X oEmbed HTML for
+  a profile timeline, injects `data-tweet-limit="3"` and other widget attributes,
+  and the client loads `platform.x.com/widgets.js`. X timeline embeds are
+  unreliable and often blocked by ad blockers / privacy tools, so
+  `TwitterFeed.astro` has a 6-second timeout fallback that shows a clean
+  "Open profile" card when the embed fails.
 - **Twitch** — official live channel player embed (`player.twitch.tv`). The
   `parent` query param is set to `location.hostname` at runtime so it works on
   any host. Twitch has no "posts", so a live player is shown instead.
 - **Instagram (x2) / TikTok (x2)** — these platforms have NO public
-  profile-timeline widget and no free, no-effort, no-API solution. They are
-  rendered as clean "Open profile" cards. To show real posts automatically you
-  need a Business/Creator account + the official API + app review, or a paid
-  third-party aggregator widget (Curator, Elfsight, Poper, etc.).
+  profile-timeline widget and no free, no-effort, no-API solution. By default
+  they render as clean "Open profile" cards. To show real posts automatically,
+  paste a third-party widget snippet (Curator, Elfsight, Poper, Pane, WidgetJar,
+  EmbedSocial, etc.) into `widgetSnippet` in `src/data/socials.ts` for that feed.
 
 ## Customization
 - Avatar: replace `public/avatar.svg` (or drop in `avatar.jpg` and update
