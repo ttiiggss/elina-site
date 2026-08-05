@@ -4,15 +4,22 @@ A polished rebuild of elina.chat: a link/socials page that shows the latest
 posts from each platform plus Discord / Throne / Donate links.
 
 ## Stack
-- Astro 4 (`output: 'hybrid'`) + `@astrojs/node` adapter (standalone).
-- Pages prerender by default; `src/pages/api/youtube.ts` opts into SSR with
-  `export const prerender = false`.
+- Astro 4 (`output: 'hybrid'`) + `@astrojs/vercel` adapter (serverless).
+- Deployed on Vercel: the page is prerendered static HTML served from the CDN;
+  `src/pages/api/youtube.ts` opts into SSR with `export const prerender = false`
+  and ships as a Vercel serverless function.
+- Node 20 runtime (`engines.node` in package.json).
 
 ## Commands
 - `npm run dev`   — dev server (host 0.0.0.0, port 4321; auto-increments if busy).
-- `npm run build` — production build to `dist/`.
-- `npm run preview` — preview the built static output.
-- `npm start`     — run the built Node server (`dist/server/entry.mjs`).
+- `npm run build` — production build to `.vercel/output/` (Vercel build format).
+- `npm run preview` — preview the built static output locally.
+
+## Deploy (Vercel)
+- Import the GitHub repo (github.com/ttiiggss/elina-site) at vercel.com.
+- Framework preset: Astro (auto-detected). No build command or output dir
+  overrides needed — the Vercel adapter handles it.
+- Push to `main` triggers an automatic redeploy.
 
 ## How each feed is sourced (no API keys required)
 - **YouTube** — `/api/youtube` proxies YouTube's public RSS feed
