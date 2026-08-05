@@ -1,5 +1,6 @@
 ---
 import type { Feed } from '../data/socials';
+import Icon from './Icon.astro';
 
 export interface Props {
   feed: Feed;
@@ -7,7 +8,7 @@ export interface Props {
 const { feed } = Astro.props;
 ---
 
-<div class="twitter-wrap">
+<div class="twitter-wrap" data-twitter-fallback={feed.url}>
   <a
     class="twitter-timeline"
     href={feed.url}
@@ -18,4 +19,35 @@ const { feed } = Astro.props;
     data-width="100%">
     Latest tweets by {feed.handle}
   </a>
+
+  <div class="fallback-card twitter-fallback" style="display:none;">
+    <div class="fb-icon" style="--fi:#1DA1F2">
+      <Icon name="x" size={28} />
+    </div>
+    <div class="fb-handle">{feed.handle}</div>
+    <div class="fb-text">
+      X timeline embeds are blocked by many browsers, ad blockers, and privacy tools.
+      Open the profile to see the latest tweets.
+    </div>
+    <a class="fb-btn" href={feed.url} target="_blank" rel="noopener" style="--accent:#1DA1F2">
+      Open profile <Icon name="external" size={14} />
+    </a>
+  </div>
 </div>
+
+<script is:inline>
+  (function () {
+    // If X's widgets.js hasn't rendered an iframe after 5s, show a useful
+    // fallback instead of leaving a blank box (ad blockers / privacy tools
+    // frequently block platform.twitter.com).
+    setTimeout(function () {
+      document.querySelectorAll('[data-twitter-fallback]').forEach(function (wrap) {
+        if (wrap.querySelector('iframe')) return;
+        var a = wrap.querySelector('.twitter-timeline');
+        if (a) a.style.display = 'none';
+        var fb = wrap.querySelector('.twitter-fallback');
+        if (fb) fb.style.display = '';
+      });
+    }, 5000);
+  })();
+</script>

@@ -1,7 +1,6 @@
 ---
 import '../styles/global.css';
 import Icon from '../components/Icon.astro';
-import { feeds } from '../data/socials';
 
 export interface Props {
   title?: string;
@@ -10,17 +9,8 @@ export interface Props {
 const {
   title = 'Elina — Links & Latest Posts',
   description =
-    "Elina's socials: the latest from Twitch, YouTube, Twitter, Instagram and TikTok, plus Discord, Throne and donations.",
+    "Elina's socials: live YouTube, Twitch, and X updates; plus links to Instagram, TikTok, Discord, Throne, and donations.",
 } = Astro.props;
-
-// Only pull in a platform's embed script when it's actually in use.
-const hasTwitter = feeds.some((f) => f.kind === 'twitter');
-const hasInstagram = feeds.some(
-  (f) => f.embed === 'instagram' && (f.posts?.length ?? 0) > 0,
-);
-const hasTikTok = feeds.some(
-  (f) => f.embed === 'tiktok' && (f.posts?.length ?? 0) > 0,
-);
 ---
 
 <!doctype html>
@@ -87,27 +77,17 @@ const hasTikTok = feeds.some(
 
     <footer class="site-footer">
       <div class="container">
-        <p>Made with <span class="heart">&hearts;</span> for Elina &mdash; posts pulled live from each platform.</p>
+        <p>Made with <span class="heart">&hearts;</span> for Elina &mdash; posts pulled live where possible, links everywhere.</p>
         <p style="margin-top:0.4em;">A polished tribute rebuild, not the official elina.chat.</p>
       </div>
     </footer>
 
-    {hasTwitter && (
-      <script is:inline>
-        document.querySelectorAll('.twitter-timeline').forEach(function (a) {
-          a.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') || 'dark');
-        });
-      </script>
-    )}
-    {hasTwitter && (
-      <script is:inline async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-    )}
-    {hasInstagram && (
-      <script is:inline async src="https://www.instagram.com/embed.js"></script>
-    )}
-    {hasTikTok && (
-      <script is:inline async src="https://www.tiktok.com/embed.js"></script>
-    )}
+    <script is:inline>
+      document.querySelectorAll('.twitter-timeline').forEach(function (a) {
+        a.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') || 'dark');
+      });
+    </script>
+    <script is:inline async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
     <script>
       // Theme toggle

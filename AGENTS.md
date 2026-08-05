@@ -28,15 +28,17 @@ posts from each platform plus Discord / Throne / Donate links.
   client-side by `YouTubeFeed.astro`.
 - **Twitter/X (x2)** — official timeline embed widgets (`platform.twitter.com/widgets.js`,
   `data-tweet-limit="3"`). Theme synced to the site theme in `Base.astro`.
+  X timeline embeds are unreliable and often blocked by ad blockers / privacy
+  tools, so `TwitterFeed.astro` has a 5-second timeout fallback that shows a
+  clean "Open profile" card when the embed fails.
 - **Twitch** — official live channel player embed (`player.twitch.tv`). The
   `parent` query param is set to `location.hostname` at runtime so it works on
   any host. Twitch has no "posts", so a live player is shown instead.
 - **Instagram (x2) / TikTok (x2)** — these platforms have NO public
-  profile-timeline widget, so official single-post embeds are driven by an
-  editable URL list in `src/data/socials.ts` (`feed.posts`). Until real URLs are
-  added, a polished fallback card is shown. Add a URL and the native embed
-  renders automatically. The IG/TikTok embed scripts are only loaded when at
-  least one `posts` entry exists.
+  profile-timeline widget and no free, no-effort, no-API solution. They are
+  rendered as clean "Open profile" cards. To show real posts automatically you
+  need a Business/Creator account + the official API + app review, or a paid
+  third-party aggregator widget (Curator, Elfsight, Poper, etc.).
 
 ## Customization
 - Avatar: replace `public/avatar.svg` (or drop in `avatar.jpg` and update
