@@ -1,0 +1,41 @@
+---
+import { profile, feeds } from '../data/socials';
+import ActionButtons from './ActionButtons.astro';
+import Icon from './Icon.astro';
+---
+<section class="hero">
+  <div class="container">
+    <div class="hero-avatar-wrap">
+      <img
+        class="hero-avatar"
+        src={profile.avatar}
+        alt={`${profile.name} avatar`}
+        width="152"
+        height="152"
+      />
+    </div>
+    <p class="hero-eyebrow">Streams &middot; Art &middot; Cats</p>
+    <h1>{profile.name}</h1>
+    <p class="hero-tagline">{profile.tagline}</p>
+
+    <ActionButtons />
+
+    <div class="socials-quick">
+      {
+        feeds.map((f) => (
+          <a
+            class="social-chip"
+            href={f.url}
+            target="_blank"
+            rel="noopener"
+            style={`--pi:${f.accent}`}
+            title={`${f.platform}${f.sub ? ' · ' + f.sub : ''} — ${f.handle}`}
+            aria-label={`${f.platform}${f.sub ? ' ' + f.sub : ''}`}
+          >
+            <Icon name={f.icon} size={18} />
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</section>

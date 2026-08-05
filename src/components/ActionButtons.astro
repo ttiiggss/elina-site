@@ -1,0 +1,19 @@
+---
+import { actionLinks } from '../data/socials';
+import Icon from './Icon.astro';
+---
+<div class="hero-actions">
+  {
+    actionLinks.map((a) => (
+      <a class="action-btn" href={a.href} target="_blank" rel="noopener" style={`--ab:${a.accent}`}>
+        <span class="icon-bubble">
+          <Icon name={a.icon} size={20} />
+        </span>
+        <span class="label-stack">
+          {a.label}
+          <small>{a.note}</small>
+        </span>
+      </a>
+    ))
+  }
+</div>

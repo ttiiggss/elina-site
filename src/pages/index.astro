@@ -1,0 +1,35 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import FeedPanel from '../components/FeedPanel.astro';
+import YouTubeFeed from '../components/YouTubeFeed.astro';
+import TwitterFeed from '../components/TwitterFeed.astro';
+import TwitchLive from '../components/TwitchLive.astro';
+import EmbedFeed from '../components/EmbedFeed.astro';
+import { feeds } from '../data/socials';
+---
+
+<Base>
+  <Hero />
+
+  <section class="container">
+    <div class="section-head reveal">
+      <p class="section-eyebrow">Fresh from the feeds</p>
+      <h2>Latest posts</h2>
+      <p>The most recent update from every account, gathered in one place.</p>
+    </div>
+
+    <div class="feeds-grid">
+      {
+        feeds.map((f) => (
+          <FeedPanel feed={f}>
+            {f.kind === 'twitch' && <TwitchLive feed={f} />}
+            {f.kind === 'youtube' && <YouTubeFeed />}
+            {f.kind === 'twitter' && <TwitterFeed feed={f} />}
+            {f.kind === 'embed' && <EmbedFeed feed={f} />}
+          </FeedPanel>
+        ))
+      }
+    </div>
+  </section>
+</Base>

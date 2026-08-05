@@ -1,0 +1,21 @@
+---
+import type { Feed } from '../data/socials';
+
+export interface Props {
+  feed: Feed;
+}
+const { feed } = Astro.props;
+---
+
+<div class="twitter-wrap">
+  <a
+    class="twitter-timeline"
+    href={feed.url}
+    data-chrome="noheader nofooter noborders transparent"
+    data-tweet-limit="3"
+    data-aria-polite="polite"
+    data-dnt="true"
+    data-width="100%">
+    Latest tweets by {feed.handle}
+  </a>
+</div>

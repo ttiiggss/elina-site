@@ -1,0 +1,37 @@
+---
+import type { Feed } from '../data/socials';
+import Icon from './Icon.astro';
+
+export interface Props {
+  feed: Feed;
+  wide?: boolean;
+}
+const { feed, wide = false } = Astro.props;
+
+const iconClass =
+  feed.embed === 'instagram' ? 'is-ig' : feed.embed === 'tiktok' ? 'is-tiktok' : '';
+const iconStyle = iconClass ? '' : `--pi:${feed.accent}`;
+---
+
+<section class={`panel reveal${wide ? ' panel--wide' : ''}`} style={`--accent:${feed.accent}`}>
+  <div class="panel-head">
+    <div class={`panel-icon ${iconClass}`} style={iconStyle}>
+      <Icon name={feed.icon} size={24} />
+    </div>
+    <div class="panel-titles">
+      <div class="panel-platform">
+        {feed.platform}
+        {feed.sub && <span class="panel-sub">{feed.sub}</span>}
+      </div>
+      <div class="panel-handle">{feed.handle}</div>
+    </div>
+    <div class="panel-head-right">
+      <a class="panel-link" href={feed.url} target="_blank" rel="noopener" title={`Open ${feed.handle} on ${feed.platform}`}>
+        Open <Icon name="external" size={13} />
+      </a>
+    </div>
+  </div>
+  <div class="panel-body">
+    <slot />
+  </div>
+</section>
