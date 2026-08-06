@@ -26,12 +26,13 @@ posts from each platform plus Discord / Throne / Donate links.
   (`https://www.youtube.com/feeds/videos.xml?channel_id=UCZBRLTVr1ZITpLsRGC-saGA`),
   returns the latest 3 uploads as JSON. 5-minute in-memory cache. Rendered
   client-side by `YouTubeFeed.astro`.
-- **Twitter/X (x2)** — `/api/twitter` fetches the official X oEmbed HTML for
-  a profile timeline, injects `data-tweet-limit="3"` and other widget attributes,
-  and the client loads `platform.x.com/widgets.js`. X timeline embeds are
-  unreliable and often blocked by ad blockers / privacy tools, so
-  `TwitterFeed.astro` has a 6-second timeout fallback that shows a clean
-  "Open profile" card when the embed fails.
+- **Twitter/X (x2)** — `/api/twitter` fetches the public RSS feed from
+  `xcancel.com` (a Nitter mirror), parses the latest 3 items, and
+  `TwitterFeed.astro` renders them as custom tweet cards with text, relative
+  timestamps, and media/video thumbnails. This is an unofficial scraping
+  mirror, so it can be rate-limited or blocked by X / xCancel at any time.
+  `TwitterFeed.astro` falls back to a clean "Open profile" card if the proxy
+  fails.
 - **Twitch** — official live channel player embed (`player.twitch.tv`). The
   `parent` query param is set to `location.hostname` at runtime so it works on
   any host. Twitch has no "posts", so a live player is shown instead.

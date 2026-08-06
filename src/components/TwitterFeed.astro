@@ -10,9 +10,27 @@ const handle = feed.handle.replace(/^@/, '');
 ---
 
 <div class="twitter-wrap" data-twitter-fallback={feed.url} data-handle={handle}>
-  <a class="twitter-timeline" href={feed.url}>
-    Latest tweets by {feed.handle}
-  </a>
+  <div class="tweet-list" data-tweet-list style="display:none;"></div>
+
+  <div class="tweet-skeletons" data-tweet-skeletons>
+    <div class="tweet-skeleton">
+      <div class="sk-line w-40" style="height:10px"></div>
+      <div class="sk-line w-90" style="height:10px"></div>
+      <div class="sk-line w-80" style="height:10px"></div>
+      <div class="sk-thumb" style="width:120px;height:80px"></div>
+    </div>
+    <div class="tweet-skeleton">
+      <div class="sk-line w-40" style="height:10px"></div>
+      <div class="sk-line w-90" style="height:10px"></div>
+      <div class="sk-line w-70" style="height:10px"></div>
+    </div>
+    <div class="tweet-skeleton">
+      <div class="sk-line w-40" style="height:10px"></div>
+      <div class="sk-line w-90" style="height:10px"></div>
+      <div class="sk-line w-85" style="height:10px"></div>
+      <div class="sk-thumb" style="width:120px;height:80px"></div>
+    </div>
+  </div>
 
   <div class="fallback-card twitter-fallback" style="display:none;">
     <div class="fb-icon" style="--fi:#1DA1F2">
@@ -20,8 +38,8 @@ const handle = feed.handle.replace(/^@/, '');
     </div>
     <div class="fb-handle">{feed.handle}</div>
     <div class="fb-text">
-      X timeline embeds are blocked by many browsers, ad blockers, and privacy tools.
-      Open the profile to see the latest tweets.
+      Latest X posts are unavailable right now. This can happen when xCancel is
+      rate-limited or X blocks the mirror. Open the profile to see the latest.
     </div>
     <a class="fb-btn" href={feed.url} target="_blank" rel="noopener" style="--accent:#1DA1F2">
       Open profile <Icon name="external" size={14} />
@@ -31,51 +49,87 @@ const handle = feed.handle.replace(/^@/, '');
 
 <script is:inline>
   (function () {
+    function relTime(iso) {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      var s = Math.max(1, (Date.now() - d.getTime()) / 1000);
+      var units = [
+        [60, 'second'],
+        [60, 'minute'],
+        [24, 'hour'],
+        [7, 'day'],
+        [4.345, 'week'],
+        [12, 'month'],
+        [Infinity, 'year'],
+      ];
+      var unit = 'second';
+      for (var i = 0; i < units.length; i++) {
+        if (s < units[i][0]) {
+          unit = units[i][1];
+          break;
+        }
+        s /= units[i][0];
+        unit = units[i][1];
+      }
+      var r = Math.floor(s);
+      return r + ' ' + unit + (r === 1 ? '' : 's') + ' ago';
+    }
+
     function showFallback(wrap) {
-      var a = wrap.querySelector('.twitter-timeline');
-      if (a) a.style.display = 'none';
+      var list = wrap.querySelector('[data-tweet-list]');
+      if (list) list.style.display = 'none';
+      var skel = wrap.querySelector('[data-tweet-skeletons]');
+      if (skel) skel.style.display = 'none';
       var fb = wrap.querySelector('.twitter-fallback');
       if (fb) fb.style.display = '';
     }
 
-    function loadWidgets(wrap) {
-      var twttr = window.twttr;
-      if (twttr && twttr.widgets && twttr.widgets.load) {
-        twttr.widgets.load(wrap);
-      } else {
-        var s = document.createElement('script');
-        s.src = 'https://platform.x.com/widgets.js';
-        s.async = true;
-        s.charset = 'utf-8';
-        s.onload = function () {
-          var t = window.twttr;
-          if (t && t.widgets && t.widgets.load) t.widgets.load(wrap);
-        };
-        document.head.appendChild(s);
-      }
+    function renderMedia(t) {
+      if (!t.media) return '';
+      var videoOverlay = t.isVideo
+        ? '<div class="tweet-video-overlay"><svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>'
+        : '';
+      return '<div class="tweet-media' + (t.isVideo ? ' is-video' : '') + '">' +
+        '<img src="' + t.media + '" alt="" loading="lazy" />' +
+        videoOverlay +
+      '</div>';
     }
 
-    function renderOembed(wrap) {
+    function renderTweets(wrap, tweets) {
+      if (!tweets || !tweets.length) {
+        showFallback(wrap);
+        return;
+      }
+      var list = wrap.querySelector('[data-tweet-list]');
+      if (!list) return;
+
+      list.innerHTML = tweets.map(function (t) {
+        return '<a class="tweet-card" href="' + t.link + '" target="_blank" rel="noopener" title="View on X">' +
+          '<div class="tweet-meta">' + relTime(t.date) + '</div>' +
+          '<div class="tweet-text">' + t.text + '</div>' +
+          renderMedia(t) +
+        '</a>';
+      }).join('');
+
+      var skel = wrap.querySelector('[data-tweet-skeletons]');
+      if (skel) skel.style.display = 'none';
+      list.style.display = '';
+    }
+
+    function loadTweets(wrap) {
       var handle = wrap.getAttribute('data-handle') || '';
       if (!handle) {
         showFallback(wrap);
         return;
       }
-      fetch('/api/twitter?handle=' + encodeURIComponent(handle) + '&theme=' + encodeURIComponent(document.documentElement.getAttribute('data-theme') || 'dark'))
+      fetch('/api/twitter?handle=' + encodeURIComponent(handle))
         .then(function (r) {
           if (!r.ok) throw new Error('http ' + r.status);
-          return r.text();
+          return r.json();
         })
-        .then(function (html) {
-          if (!html.trim()) throw new Error('empty');
-          var placeholder = wrap.querySelector('.twitter-timeline');
-          if (!placeholder) throw new Error('no placeholder');
-          placeholder.outerHTML = html;
-          loadWidgets(wrap);
-          // If no iframe appears after 6s, the widget was blocked or failed.
-          setTimeout(function () {
-            if (!wrap.querySelector('iframe')) showFallback(wrap);
-          }, 6000);
+        .then(function (tweets) {
+          if (!Array.isArray(tweets) || tweets.length === 0) throw new Error('empty');
+          renderTweets(wrap, tweets);
         })
         .catch(function () {
           showFallback(wrap);
@@ -84,7 +138,7 @@ const handle = feed.handle.replace(/^@/, '');
 
     setTimeout(function () {
       document.querySelectorAll('[data-twitter-fallback]').forEach(function (el) {
-        renderOembed(el);
+        loadTweets(el);
       });
     }, 100);
   })();
